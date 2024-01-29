@@ -34,12 +34,12 @@ public abstract class AbstractCommand {
   public abstract void postProcessing(Update update, String lastMessage) throws UserException;
 
 
-  protected void saveState(User user) {
-    // сохранить состояние
+  protected void saveState(String message, User user) {
+    stateService.setLastMessageMap(message, user);
   }
 
   protected void clearState(User user) {
-    // очистиьт состояние
+    stateService.clearLastMessage(user);
   }
 
 }

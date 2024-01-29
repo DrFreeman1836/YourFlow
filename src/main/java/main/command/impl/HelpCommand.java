@@ -21,6 +21,7 @@ public class HelpCommand extends AbstractCommand {
   @Override
   public void processing(Update update) throws UserException {
     telegramRequest.sendMessage(update.getMessage().getChatId(), "help");
+    throw new UserException("f[f[f[f");
   }
 
   @Override

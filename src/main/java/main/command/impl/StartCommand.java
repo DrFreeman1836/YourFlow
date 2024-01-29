@@ -23,12 +23,13 @@ public class StartCommand extends AbstractCommand {
     User user = update.getMessage().getFrom();
     String name = user.getFirstName() == null ? user.getUserName() : user.getFirstName();
     try {
-      //userService.findUserByIdTelegram(user.getId());
-      telegramRequest.sendMessage(update.getMessage().getChatId(), "start");
-      //telegramRequest.sendMessage(update.getMessage().getChatId(), name + ", привет!", StorageMenu.getMainMenu());
+      userService.findUserByIdTelegram(user.getId());
+      telegramRequest.sendMessage(update.getMessage().getChatId(), name + ", привет!");
     } catch (UserException ex) {
-      //userService.saveUser(update);
-      //telegramRequest.sendMessage(update.getMessage().getChatId(), name + ", привет!", StorageMenu.getMainMenu());
+      userService.saveUser(update);
+      telegramRequest.sendMessage(update.getMessage().getChatId(), name + ", привет!"/*, StorageMenu.getMainMenu()*/);
+    } finally {
+      clearState(user);
     }
 
   }

@@ -1,6 +1,7 @@
 package main;
 
 import main.command.CommandStorage;
+import main.state.StateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -11,7 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.User;
 @Component
 public class Bot extends TelegramLongPollingBot {
 
-  //private StateService stateService;
+  private StateService stateService;
 
   @Value("${bot.token}")
   private String token;
@@ -20,8 +21,8 @@ public class Bot extends TelegramLongPollingBot {
   private String name;
 
   @Autowired
-  public void setUserService(/*StateService stateService*/) {
-    //this.stateService = stateService;
+  public void setUserService(StateService stateService) {
+    this.stateService = stateService;
   }
 
   @Override
@@ -50,11 +51,11 @@ public class Bot extends TelegramLongPollingBot {
       return;
     }
 
-//    key = stateService.getMessage(user);
-//    if (CommandStorage.getMapCommand().containsKey(key)) {
-//      CommandStorage.getMapCommand().get(key).postProcessing(update, key);
-//      return;
-//    }
+    key = stateService.getLastMessage(user);
+    if (CommandStorage.getMapCommand().containsKey(key)) {
+      CommandStorage.getMapCommand().get(key).postProcessing(update, key);
+      return;
+    }
 
   }
 
