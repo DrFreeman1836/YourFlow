@@ -2,3 +2,12 @@ databaseChangeLog:
   - include:
       file: changeset/create_user.sql
       relativeToChangelogFile: true
+  - include:
+      file: changeset/create_storage_category.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changeset/create_last_message.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changeset/create_storage.sql
+      relativeToChangelogFile: true

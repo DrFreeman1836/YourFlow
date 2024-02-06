@@ -3,6 +3,7 @@ package main.command.impl;
 import main.api.telegram.impl.TelegramRequestImpl;
 import main.command.AbstractCommand;
 import main.exception.UserException;
+import main.service.SendingMessageDecorator;
 import main.service.UserService;
 import main.state.StateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +15,19 @@ public class HelpCommand extends AbstractCommand {
 
   @Autowired
   public HelpCommand(UserService userService,
-      TelegramRequestImpl telegramRequest,
+      SendingMessageDecorator sendingMessage,
       StateService stateService) {
-    super("/help", userService, telegramRequest, stateService);
+    super(userService, sendingMessage, stateService);
+    commandLevels.add("/help");
   }
   @Override
   public void processing(Update update) throws UserException {
-    telegramRequest.sendMessage(update.getMessage().getChatId(), "help");
-    throw new UserException("f[f[f[f");
+
+  }
+
+  @Override
+  public void backProcessing(Update update, String lastMessage) throws UserException {
+
   }
 
   @Override

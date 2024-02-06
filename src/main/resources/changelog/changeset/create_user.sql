@@ -3,6 +3,7 @@ CREATE TABLE `users` (
   `chat_id` bigint DEFAULT NULL,
   `first_name` varchar(255) DEFAULT NULL,
   `id_telegram` bigint DEFAULT NULL,
+  `id_info_message` bigint DEFAULT NULL,
   `last_name` varchar(255) DEFAULT NULL,
   `user_name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),

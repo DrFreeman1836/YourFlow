@@ -35,8 +35,12 @@ public class TelegramRequestImpl {
    * @return
    */
   public ResponseEntity<RspMessageDto> sendMessage(Long chatId, String text, ParseMode parseMode, ReplyKeyboard markup) {
+    if (markup == null) {
+      ResponseEntity<RspMessageDto> response = request.sendMessage(chatId, text, parseMode.getParseMode(), null);
+      return response;
+    }
     String markupString = "";
-    try{
+    try {
       markupString = mapper.writeValueAsString(markup);
     } catch (JsonProcessingException ex) {
       ex.printStackTrace();
@@ -45,13 +49,13 @@ public class TelegramRequestImpl {
     return response;
   }
 
-  public ResponseEntity<RspMessageDto> sendMessage(Long chatId, String text, ReplyKeyboard markup) {
-    return sendMessage(chatId, text, ParseMode.NON, markup);
-  }
-
-  public ResponseEntity<RspMessageDto> sendMessage(Long chatId, String text) {
-    return request.sendMessage(chatId, text, ParseMode.NON.getParseMode(), null);
-  }
+//  public ResponseEntity<RspMessageDto> sendMessage(Long chatId, String text, ReplyKeyboard markup) {
+//    return sendMessage(chatId, text, ParseMode.NON, markup);
+//  }
+//
+//  public ResponseEntity<RspMessageDto> sendMessage(Long chatId, String text) {
+//    return request.sendMessage(chatId, text, ParseMode.NON.getParseMode(), null);
+//  }
 
   /**
    * Отправка фото
