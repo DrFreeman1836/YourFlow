@@ -12,6 +12,7 @@ import main.service.SendingMessageDecorator;
 import main.service.StorageService;
 import main.service.UserService;
 import main.state.StateService;
+import main.utils.BotUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -40,15 +41,15 @@ public class StorageCommand extends AbstractCommand {
     saveState(currentCommand(), user);
     StorageCategory category = storageService.findCategoryById(getNumberData(update.getCallbackQuery().getData()));
     List<Storage> storageCategories = storageService.findAllStorageByUsersAndCategory(category);
-    sendingMessage.sendSimpleMessage(user, getChatId(update), "Ваш контент:",
+    sendingMessage.sendSimpleMessage(user, BotUtils.getChatId(update), "Ваш контент:",
         StorageMenu.storageCategoryMenu(), true);
     if (storageCategories.isEmpty()) {
-      sendingMessage.sendSimpleMessage(user, getChatId(update), "Тут пока ничего не сохранено",
+      sendingMessage.sendSimpleMessage(user, BotUtils.getChatId(update), "Тут пока ничего не сохранено",
           StorageMenu.storageCategoryMenu(), true);
       return;
     }
     storageCategories.forEach(s -> {
-      sendingMessage.sendSimpleMessage(user, getChatId(update), s.getPreview(), ParseMode.NON, InlineMenu.toCategoryStorage(s.getId()), false);
+      sendingMessage.sendSimpleMessage(user, BotUtils.getChatId(update), s.getPreview(), ParseMode.NON, InlineMenu.toCategoryStorage(s.getId()), false);
     });
   }
 

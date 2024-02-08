@@ -1,11 +1,9 @@
 package main.command.impl;
 
 import main.command.AbstractCommand;
-import main.command.CommandStorage;
 import main.exception.UserException;
 import main.form.FormProcessing;
 import main.menu.StorageMenu;
-import main.model.Users;
 import main.service.SendingMessageDecorator;
 import main.service.StorageService;
 import main.service.UserService;
@@ -16,51 +14,49 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 
 @Service
-public class AddingCategoryStorageCommand extends AbstractCommand {
+public class AddingCommand extends AbstractCommand {
 
-  public static final String NAME = "Добавить категорию";
+  public static final String NAME = "Добавить";
 
   private final StorageService storageService;
 
   private final FormProcessing formProcessing;
 
   @Autowired
-  public AddingCategoryStorageCommand(UserService userService,
+  public AddingCommand(UserService userService,
       SendingMessageDecorator sendingMessage, StateService stateService,
       StorageService storageService, FormProcessing formProcessing) {
     super(userService, sendingMessage, stateService);
     this.storageService = storageService;
     this.formProcessing = formProcessing;
-    commandLevels.add(CategoryStorageCommand.NAME);
+    commandLevels.add("Главное меню");
     commandLevels.add(NAME);
   }
 
   @Override
   public void processing(Update update) throws UserException {
-    User user = update.getMessage().getFrom();
-    saveState("Добавить категорию", user);
-    sendingMessage.sendSimpleMessage(user, update.getMessage().getChatId(),
-        "Введите название категории хранилища...", StorageMenu.backMenu(), true);
+
   }
 
-  public void processing(Update update, Object form) throws UserException {
+  public void processing(Update update, Class<?> clazz) throws UserException {
     User user = update.getMessage().getFrom();
-    saveState("Добавить категорию", user);
+    saveState(currentCommand(), user);
+    formProcessing.registerForm(user, clazz);
     sendingMessage.sendSimpleMessage(user, update.getMessage().getChatId(),
-        "Введите название категории хранилища...", StorageMenu.backMenu(), true);
+        formProcessing.getRequestToUser(update), StorageMenu.backMenu(), true);
   }
 
   @Override
   public void postProcessing(Update update, String lastMessage) throws UserException {
     User user = update.getMessage().getFrom();
-    Users users = userService.findUserByIdTelegram(user.getId());
-    storageService.saveStorageCategory(users, update.getMessage().getText());
-//    sendingMessage.sendSimpleMessage(user, update.getMessage().getChatId(),
-//        "Сохранена категория хранилища \"" + update.getMessage().getText() + "\"",
-//        StorageMenu.backMenu(), true);
+    String requestMessage = formProcessing.getRequestToUser(update);
+    sendingMessage.sendSimpleMessage(user, update.getMessage().getChatId(), requestMessage,
+        StorageMenu.backMenu(), false);
+  }
+
+  public void backProcessing(Update update, String lastMessage) throws UserException {
     clearState(update.getMessage().getFrom());
-    String previousLevel = previousCommand();
-    CommandStorage.getMapCommand().get(previousLevel).processing(update);
+    sendingMessage.sendSimpleMessage(update.getMessage().getFrom(), update.getMessage().getChatId(), previousCommand(), StorageMenu.getMainMenu(), true);
   }
 
 }

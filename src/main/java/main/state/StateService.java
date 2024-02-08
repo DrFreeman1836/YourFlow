@@ -1,9 +1,12 @@
 package main.state;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import main.command.impl.CategoryStorageCommand;
+import main.command.impl.StorageCommand;
+import main.model.Storage;
+import main.model.StorageCategory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.User;
@@ -34,6 +37,19 @@ public class StateService {
     } else {
       lastMessageMap.put(user, lastMessage);
     }
+  }
+
+  /**
+   * По последнему сообщению определят какой объект создавать
+   * @param lastMessage
+   * @return
+   */
+  public Class<?> getClassFormByState(String lastMessage) {
+    return switch (lastMessage) {
+      case CategoryStorageCommand.NAME -> StorageCategory.class;
+      case StorageCommand.NAME -> Storage.class;
+      default -> null;
+    };
   }
 
   public String getLastMessage(User user) {

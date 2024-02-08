@@ -12,7 +12,7 @@ public class StorageMenu {
   //https://apps.timwhitlock.info/emoji/tables/unicode ссылка на список имоджи
   private static KeyboardButton storage = new KeyboardButton("\uD83D\uDCBEХранилище");
   private static KeyboardButton back = new KeyboardButton("\uD83D\uDD19Назад");
-  private static KeyboardButton addStorage = new KeyboardButton("➕Добавить категорию");
+  private static KeyboardButton addStorage = new KeyboardButton("➕Добавить");
 
   /**
    * Главное меню

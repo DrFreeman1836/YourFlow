@@ -70,6 +70,9 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     try {
+      if ("Добавить".equals(key)) {
+        CommandStorage.getMapCommand().get(key).processing(update, stateService.getClassFormByState(stateService.getLastMessage(user)));
+      }
       if (CommandStorage.getMapCommand().containsKey(key)) {
         CommandStorage.getMapCommand().get(key).processing(update);
         return;

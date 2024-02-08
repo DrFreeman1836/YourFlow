@@ -33,6 +33,10 @@ public abstract class AbstractCommand {
 
   public abstract void processing(Update update) throws UserException;
 
+  public void processing(Update update, Class<?> clazz) throws UserException {
+
+  }
+
   public abstract void postProcessing(Update update, String lastMessage) throws UserException;
 
   public void backProcessing(Update update, String lastMessage) throws UserException {
@@ -61,16 +65,6 @@ public abstract class AbstractCommand {
 
   protected Long getNumberData(String data) {
     return Long.valueOf(data.replaceAll("[^0-9]", ""));
-  }
-
-  protected User getUser(Update update) {
-    return update.getMessage() != null ? update.getMessage().getFrom()
-        : update.getCallbackQuery().getFrom();
-  }
-
-  protected Long getChatId(Update update) {
-    return update.getMessage() != null ? update.getMessage().getChatId()
-        : update.getCallbackQuery().getMessage().getChatId();
   }
 
 }

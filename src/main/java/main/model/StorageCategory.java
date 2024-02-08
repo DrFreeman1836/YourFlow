@@ -23,7 +23,7 @@ public class StorageCategory {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @MappingForm(needMapping = true, caption = "Введите название категории хранилища...")
+  @MappingForm(caption = "Введите название категории хранилища...")
   @Column(name = "NAME")
   private String name;
 
