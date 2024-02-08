@@ -1,6 +1,7 @@
 package main.command.impl;
 
 import main.command.AbstractCommand;
+import main.command.CommandStorage;
 import main.exception.UserException;
 import main.form.FormProcessing;
 import main.menu.StorageMenu;
@@ -8,6 +9,7 @@ import main.service.SendingMessageDecorator;
 import main.service.StorageService;
 import main.service.UserService;
 import main.state.StateService;
+import main.utils.BotUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -18,18 +20,13 @@ public class AddingCommand extends AbstractCommand {
 
   public static final String NAME = "Добавить";
 
-  private final StorageService storageService;
-
   private final FormProcessing formProcessing;
 
   @Autowired
   public AddingCommand(UserService userService,
-      SendingMessageDecorator sendingMessage, StateService stateService,
-      StorageService storageService, FormProcessing formProcessing) {
+      SendingMessageDecorator sendingMessage, StateService stateService, FormProcessing formProcessing) {
     super(userService, sendingMessage, stateService);
-    this.storageService = storageService;
     this.formProcessing = formProcessing;
-    commandLevels.add("Главное меню");
     commandLevels.add(NAME);
   }
 
@@ -39,6 +36,7 @@ public class AddingCommand extends AbstractCommand {
   }
 
   public void processing(Update update, Class<?> clazz) throws UserException {
+    stateService.setLastLevel(stateService.getLastMessage(BotUtils.getUser(update)), BotUtils.getUser(update));
     User user = update.getMessage().getFrom();
     saveState(currentCommand(), user);
     formProcessing.registerForm(user, clazz);
@@ -55,8 +53,11 @@ public class AddingCommand extends AbstractCommand {
   }
 
   public void backProcessing(Update update, String lastMessage) throws UserException {
-    clearState(update.getMessage().getFrom());
-    sendingMessage.sendSimpleMessage(update.getMessage().getFrom(), update.getMessage().getChatId(), previousCommand(), StorageMenu.getMainMenu(), true);
+    clearState(BotUtils.getUser(update));
+    formProcessing.clearState(BotUtils.getUser(update));
+    String previousLevel = stateService.getLastLevel(BotUtils.getUser(update));
+    CommandStorage.getMapCommand().get(previousLevel).processing(update);
+    stateService.clearLastLevel(BotUtils.getUser(update));
   }
 
 }

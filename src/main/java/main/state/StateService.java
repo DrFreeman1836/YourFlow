@@ -24,10 +24,25 @@ public class StateService {
    */
   private final HashMap<User, List<Long>> firstMessage;
 
+  /**
+   * Сохранять предыдущее меню
+   */
+  private final HashMap<User, String> level;
+
   @Autowired
   public StateService() {
+    this.level = new HashMap<>();
     this.lastMessageMap = new HashMap<>();
     this.firstMessage = new HashMap<>();
+  }
+
+  public void setLastLevel(String lastLevel, User user) {
+    if (level.containsKey(user)) {
+      level.remove(user);
+      level.put(user, lastLevel);
+    } else {
+      level.put(user, lastLevel);
+    }
   }
 
   public void setLastMessageMap(String lastMessage, User user) {
@@ -56,8 +71,16 @@ public class StateService {
     return lastMessageMap.get(user);
   }
 
+  public String getLastLevel(User user) {
+    return level.get(user);
+  }
+
   public void clearLastMessage(User user) {
     lastMessageMap.remove(user);
+  }
+
+  public void clearLastLevel(User user) {
+    level.remove(user);
   }
 
   public void addFirstMessage(User user, Long idMessage) {

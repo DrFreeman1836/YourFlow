@@ -97,6 +97,11 @@ public class FormProcessing {
     return "Сохранено!";
   }
 
+  public void clearState(User user) {
+    formMap.remove(user);
+    fieldMap.remove(user);
+  }
+
   private synchronized List<Field> sortingFields(Field[] fields) {
     return Arrays.stream(fields).sorted(Comparator.comparing(Field::getName)).toList();
   }
