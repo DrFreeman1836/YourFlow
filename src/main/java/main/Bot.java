@@ -4,6 +4,7 @@ import main.command.CommandStorage;
 import main.exception.UserException;
 import main.service.UserService;
 import main.state.StateService;
+import main.utils.BotUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -88,28 +89,28 @@ public class Bot extends TelegramLongPollingBot {
       }
     } catch (UserException ex) {
       ex.printStackTrace();
-      SendMessage messageError = new SendMessage();
-      messageError.setChatId(String.valueOf(update.getMessage() != null ? update.getMessage().getChatId() : update.getCallbackQuery().getMessage().getChatId()));
-      messageError.setText(ex.getMessage());
-      sendMessage(messageError, user);
+      sendMessage(ex.getMessage(), update);
     } catch (NullPointerException ex) {
       ex.printStackTrace();
-      SendMessage messageError = new SendMessage();
-      messageError.setChatId(String.valueOf(update.getMessage() != null ? update.getMessage().getChatId() : update.getCallbackQuery().getMessage().getChatId()));
-      messageError.setText("Ошибка, выполните команду /start");
-      sendMessage(messageError, user);
+      sendMessage("Ошибка, выполните команду /start", update);
     }
 
   }
 
-  private void sendMessage(SendMessage message, User user) {
-    if(message == null) return;
+  private void sendMessage(String textMessage, Update update) {
+    SendMessage message = new SendMessage();
+    message.setChatId(String.valueOf(BotUtils.getChatId(update)));
+    message.setText(textMessage);
     try {
       Integer messId = execute(message).getMessageId();
-      userService.saveLastMessage(user.getId(), messId.longValue());
+      userService.saveLastMessage(BotUtils.getUser(update).getId(), messId.longValue());
     } catch (TelegramApiException e) {
       e.printStackTrace();
     }
   }
 
 }
+//todo: рефактор этого класса
+//todo: обработка ошибки по удалению старого сообщения и решение проблемы
+
+//TODO: решение нахлабучки с командами (возмонжо, команды буду хранить состояние)(состояние в командах <user, linckedList> связаный список с кастомным классом в котором все состояние)
