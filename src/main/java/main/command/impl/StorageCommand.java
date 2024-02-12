@@ -29,17 +29,17 @@ public class StorageCommand extends AbstractCommand {
   public StorageCommand(UserService userService,
       SendingMessageDecorator sendingMessage, StateService stateService,
       StorageService storageService) {
-    super(userService, sendingMessage, stateService);
+    super(userService, sendingMessage, stateService, NAME);
     this.storageService = storageService;
-    commandLevels.add(CategoryStorageCommand.NAME);
-    commandLevels.add(NAME);
   }
 
   @Override
   public void processing(Update update) throws UserException {
-    User user = update.getMessage() != null ? update.getMessage().getFrom() : update.getCallbackQuery().getFrom();
-    saveState(currentCommand(), user);
-    StorageCategory category = storageService.findCategoryById(getNumberData(update.getCallbackQuery().getData()));
+    super.processing(update);
+    User user = BotUtils.getUser(update);
+    Long data = update.hasCallbackQuery() ? BotUtils.getNumberData(update.getCallbackQuery().getData())
+        : BotUtils.getNumberData(stateService.getCurrentLevel(user).getUpdate().getCallbackQuery().getData());
+    StorageCategory category = storageService.findCategoryById(data);
     List<Storage> storageCategories = storageService.findAllStorageByUsersAndCategory(category);
     sendingMessage.sendSimpleMessage(user, BotUtils.getChatId(update), "Ваш контент:",
         StorageMenu.storageCategoryMenu(), true);
@@ -49,13 +49,20 @@ public class StorageCommand extends AbstractCommand {
       return;
     }
     storageCategories.forEach(s -> {
-      sendingMessage.sendSimpleMessage(user, BotUtils.getChatId(update), s.getPreview(), ParseMode.NON, InlineMenu.toCategoryStorage(s.getId()), false);
+      sendingMessage.sendSimpleMessage(user, BotUtils.getChatId(update), s.toString(), ParseMode.NON, InlineMenu.toStorage(s.getId()), false);
     });
   }
 
   @Override
-  public void postProcessing(Update update, String lastMessage) throws UserException {
-
+  public void postProcessing(Update update) throws UserException {
+    User user = BotUtils.getUser(update);
+    String data = update.getCallbackQuery() == null ? null : update.getCallbackQuery().getData();
+    if (data == null) return;
+    Long idMes = update.getCallbackQuery().getMessage().getMessageId().longValue();
+    if (data.startsWith("d")) {
+      storageService.deleteStorageById(BotUtils.getNumberData(data));
+      sendingMessage.deleteMessageById(idMes, user.getId());
+    }
   }
 
 }

@@ -1,6 +1,7 @@
 package main.model;
 
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -23,11 +24,11 @@ public class StorageCategory {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @MappingForm(caption = "Введите название категории хранилища...")
+  @MappingForm(position = 1, caption = "Введите название категории хранилища...")
   @Column(name = "NAME")
   private String name;
 
-  @OneToMany(mappedBy = "storageCategory", fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "storageCategory", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
   private List<Storage> storageList;
 
   @ManyToOne(fetch = FetchType.LAZY)

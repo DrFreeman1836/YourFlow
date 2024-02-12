@@ -30,6 +30,18 @@ public class InlineMenu {
     return markupInline;
   }
 
+  public static InlineKeyboardMarkup toStorage(Long data) {
+    delete.setCallbackData("d" + data);
+    InlineKeyboardMarkup markupInline = new InlineKeyboardMarkup();
+    List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
+    List<InlineKeyboardButton> rowInline = new ArrayList<>();
+    rowInline.add(delete);
+    rowsInline.add(rowInline);
+    markupInline.setKeyboard(rowsInline);
+
+    return markupInline;
+  }
+
   public static InlineKeyboardMarkup start(Long data) {
     start.setCallbackData(String.valueOf(data));
     delete.setCallbackData("d" + String.valueOf(data));
