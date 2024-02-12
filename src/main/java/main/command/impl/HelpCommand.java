@@ -17,8 +17,7 @@ public class HelpCommand extends AbstractCommand {
   public HelpCommand(UserService userService,
       SendingMessageDecorator sendingMessage,
       StateService stateService) {
-    super(userService, sendingMessage, stateService);
-    commandLevels.add("/help");
+    super(userService, sendingMessage, stateService, "/help");
   }
   @Override
   public void processing(Update update) throws UserException {
@@ -26,12 +25,12 @@ public class HelpCommand extends AbstractCommand {
   }
 
   @Override
-  public void backProcessing(Update update, String lastMessage) throws UserException {
+  public void backProcessing(Update update) throws UserException {
 
   }
 
   @Override
-  public void postProcessing(Update update, String lastMessage) throws UserException {
+  public void postProcessing(Update update) throws UserException {
 
   }
 }

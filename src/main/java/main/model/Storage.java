@@ -10,6 +10,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.Data;
+import main.form.MappingForm;
 
 @Data
 @Entity
@@ -20,14 +21,21 @@ public class Storage {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @MappingForm(position = 1, caption = "Введите заголовок...")
   @Column(name = "PREVIEW")
   private String preview;
 
+  @MappingForm(position = 2, caption = "Пришлите контент...")
   @Column(name = "CONTENT", columnDefinition = "text")
   private String content;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "storage_category_id")
   private StorageCategory storageCategory;
+
+  @Override
+  public String toString() {
+    return  preview + ":" + "\n\n" + content;
+  }
 
 }

@@ -1,6 +1,7 @@
 package main;
 
 import main.command.CommandStorage;
+import main.command.impl.AddingCommand;
 import main.exception.UserException;
 import main.service.UserService;
 import main.state.StateService;
@@ -54,43 +55,41 @@ public class Bot extends TelegramLongPollingBot {
         ? update.getCallbackQuery().getData()
         : update.getMessage().getText() == null ? null
             : update.getMessage().getText().replaceAll("[^ЁёА-я /start /help]", "");
-    String mes = update.getMessage() != null ? update.getMessage().getText() : update.getCallbackQuery().getMessage().getText();
-
     System.out.println(key);
-    User user = update.getMessage() == null ? update.getCallbackQuery().getFrom() : update.getMessage().getFrom();
 
+    User user = BotUtils.getUser(update);
     Long idMes = update.getMessage() != null ? update.getMessage().getMessageId().longValue() : null;
     try {
       if (idMes != null) {
         userService.saveLastMessage(user.getId(), idMes);
       }
     } catch (UserException ex) {
-      if (idMes != null) {
-        stateService.addFirstMessage(user, idMes);
-      }
+      stateService.addFirstMessage(user, idMes);
     }
 
     try {
-      if ("Добавить".equals(key)) {
-        CommandStorage.getMapCommand().get(key).processing(update, stateService.getClassFormByState(stateService.getLastMessage(user)));
+      // обработка ввода пользователя
+
+      if ("Назад".equals(key)) {
+        try {
+          stateService.getCurrentLevel(user).getCommand().backProcessing(update);
+        } catch (IndexOutOfBoundsException ex) {
+          CommandStorage.getMapCommand().get("/start").processing(update);
+        }
       }
-      if (CommandStorage.getMapCommand().containsKey(key)) {
-        CommandStorage.getMapCommand().get(key).processing(update);
-        return;
+      if (AddingCommand.NAME.equals(key)) {
+        CommandStorage.getMapCommand().get(key).processing(update, stateService.getClassFormByState(stateService.getCurrentLevel(user).getCommand()));
       }
 
-      key = stateService.getLastMessage(user);
-      if (CommandStorage.getMapCommand().containsKey(key) && !"Назад".equals(mes.replaceAll("[^ЁёА-я /start /help]", ""))) {
-        CommandStorage.getMapCommand().get(key).postProcessing(update, key);
-        return;
+      if (CommandStorage.getMapCommand().containsKey(key)) {
+        CommandStorage.getMapCommand().get(key).processing(update);
       } else {
-        CommandStorage.getMapCommand().get(key).backProcessing(update, key);
-        return;
+        stateService.getCurrentLevel(user).getCommand().postProcessing(update);
       }
     } catch (UserException ex) {
       ex.printStackTrace();
       sendMessage(ex.getMessage(), update);
-    } catch (NullPointerException ex) {
+    } catch (Exception ex) {
       ex.printStackTrace();
       sendMessage("Ошибка, выполните команду /start", update);
     }
@@ -110,7 +109,4 @@ public class Bot extends TelegramLongPollingBot {
   }
 
 }
-//todo: рефактор этого класса
 //todo: обработка ошибки по удалению старого сообщения и решение проблемы
-
-//TODO: решение нахлабучки с командами (возмонжо, команды буду хранить состояние)(состояние в командах <user, linckedList> связаный список с кастомным классом в котором все состояние)

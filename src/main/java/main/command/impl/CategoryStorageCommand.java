@@ -13,6 +13,7 @@ import main.service.SendingMessageDecorator;
 import main.service.StorageService;
 import main.service.UserService;
 import main.state.StateService;
+import main.utils.BotUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -29,16 +30,14 @@ public class CategoryStorageCommand extends AbstractCommand {
   public CategoryStorageCommand(UserService userService,
       SendingMessageDecorator sendingMessage,
       StateService stateService, StorageService storageService) {
-    super(userService, sendingMessage, stateService);
+    super(userService, sendingMessage, stateService, NAME);
     this.storageService = storageService;
-    commandLevels.add("Главное меню");
-    commandLevels.add(NAME);
   }
 
   @Override
   public void processing(Update update) throws UserException {
+    super.processing(update);
     User user = update.getMessage().getFrom();
-    saveState(currentCommand(), user);
     Users users = userService.findUserByIdTelegram(user.getId());
     List<StorageCategory> storageCategories = storageService.findAllCategoriesByUsers(users);
     sendingMessage.sendSimpleMessage(user, update.getMessage().getChatId(), "Ваши категории:",
@@ -54,23 +53,17 @@ public class CategoryStorageCommand extends AbstractCommand {
   }
 
   @Override
-  public void postProcessing(Update update, String lastMessage) throws UserException {
+  public void postProcessing(Update update) throws UserException {
     User user = update.getCallbackQuery() != null ? update.getCallbackQuery().getFrom() : update.getMessage().getFrom();
     String data = update.getCallbackQuery() == null ? null : update.getCallbackQuery().getData();
     if (data == null) return;
     Long idMes = update.getCallbackQuery().getMessage().getMessageId().longValue();
     if (data.startsWith("d")) {
-      storageService.deleteCategoryById(getNumberData(data));
+      storageService.deleteCategoryById(BotUtils.getNumberData(data));
       sendingMessage.deleteMessageById(idMes, user.getId());
     } else if (data.startsWith("s")) {
       CommandStorage.getMapCommand().get("Контент").processing(update);
     }
-  }
-
-  @Override
-  public void backProcessing(Update update, String lastMessage) throws UserException {
-    clearState(update.getMessage().getFrom());
-    sendingMessage.sendSimpleMessage(update.getMessage().getFrom(), update.getMessage().getChatId(), previousCommand(), StorageMenu.getMainMenu(), true);
   }
 
 }

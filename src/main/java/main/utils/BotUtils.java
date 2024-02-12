@@ -14,5 +14,9 @@ public class BotUtils {
     return update.getMessage() != null ? update.getMessage().getChatId()
         : update.getCallbackQuery().getMessage().getChatId();
   }
+  public static Long getNumberData(String data) {
+    return Long.valueOf(data.replaceAll("[^0-9]", ""));
+  }
+
 
 }

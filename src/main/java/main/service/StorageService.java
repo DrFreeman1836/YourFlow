@@ -37,6 +37,10 @@ public class StorageService {
     storageCategoryRepo.deleteById(id);
   }
 
+  public void deleteStorageById(Long id) {
+    storageRepo.deleteById(id);
+  }
+
   public List<StorageCategory> findAllCategoriesByUsers(Users users) {
     return storageCategoryRepo.findAllByUsers(users);
   }

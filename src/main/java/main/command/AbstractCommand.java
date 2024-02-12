@@ -1,13 +1,12 @@
 package main.command;
 
-import java.util.LinkedList;
 import javax.annotation.PostConstruct;
 import main.exception.UserException;
 import main.service.SendingMessageDecorator;
 import main.service.UserService;
 import main.state.StateService;
+import main.utils.BotUtils;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.User;
 
 public abstract class AbstractCommand {
 
@@ -17,54 +16,39 @@ public abstract class AbstractCommand {
 
   protected final StateService stateService;
 
-  protected final LinkedList<String> commandLevels;
+   protected final String name;
 
-  public AbstractCommand(UserService userService, SendingMessageDecorator sendingMessage, StateService stateService) {
+  public AbstractCommand(UserService userService, SendingMessageDecorator sendingMessage, StateService stateService, String name) {
     this.userService = userService;
     this.sendingMessage = sendingMessage;
     this.stateService = stateService;
-    this.commandLevels = new LinkedList<>();
+    this.name = name;
   }
 
   @PostConstruct
   public void addingCommand() {
-    CommandStorage.addCommand(commandLevels.getLast(), this);
+    CommandStorage.addCommand(this.name, this);
   }
 
-  public abstract void processing(Update update) throws UserException;
+  public void processing(Update update) throws UserException {
+    saveState(update);
+  }
 
   public void processing(Update update, Class<?> clazz) throws UserException {
-
+    saveState(update);
   }
 
-  public abstract void postProcessing(Update update, String lastMessage) throws UserException;
-
-  public void backProcessing(Update update, String lastMessage) throws UserException {
-    clearState(update.getMessage().getFrom());
-    String previousLevel = previousCommand();
-    CommandStorage.getMapCommand().get(previousLevel).processing(update);
+  public void postProcessing(Update update) throws UserException {
+    saveState(update);
   }
 
-  protected void saveState(String message, User user) {
-    stateService.clearLastMessage(user);
-    stateService.setLastMessageMap(message, user);
+  public void backProcessing(Update update) throws UserException {
+    AbstractCommand previousLevel = stateService.getPreviousLevel(BotUtils.getUser(update), true).getCommand();
+    previousLevel.processing(update);
   }
 
-  protected void clearState(User user) {
-    stateService.clearLastMessage(user);
-  }
-
-  protected String currentCommand() {
-    return commandLevels.getLast();
-  }
-
-  protected String previousCommand() {
-    //todo: обработать ошибку если в списке меньше двух записей
-    return commandLevels.get(commandLevels.size() - 2);
-  }
-
-  protected Long getNumberData(String data) {
-    return Long.valueOf(data.replaceAll("[^0-9]", ""));
+  public void saveState(Update update) {
+    stateService.addLevel(this, update);
   }
 
 }

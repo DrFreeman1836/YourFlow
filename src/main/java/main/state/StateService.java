@@ -1,36 +1,72 @@
 package main.state;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import main.command.AbstractCommand;
 import main.command.impl.CategoryStorageCommand;
 import main.command.impl.StorageCommand;
 import main.model.Storage;
 import main.model.StorageCategory;
+import main.utils.BotUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 
 @Service
 public class StateService {
 
+  private final HashMap<User, List<StateDto>> state;
+
+  @Autowired
+  public StateService() {
+    this.firstMessage = new HashMap<>();
+    this.state = new HashMap<>();
+  }
+
+
   /**
-   * Используется для сохранения состояния в командах
+   * Уровни команд пользователя
    */
-  private final HashMap<User, String> lastMessageMap;
-  public void setLastMessageMap(String lastMessage, User user) {
-    if (lastMessageMap.containsKey(user)) {
-      lastMessageMap.remove(user);
-      lastMessageMap.put(user, lastMessage);
+  public void addLevel(AbstractCommand command, Update update) {
+    User user = BotUtils.getUser(update);
+    StateDto stateDto = makeState(command, update);
+    if (!state.containsKey(user)) {
+      state.put(user, new ArrayList<>());
+      state.get(user).add(stateDto);
     } else {
-      lastMessageMap.put(user, lastMessage);
+      if (!getCurrentLevel(user).getName().equals(command.getClass().getName())) {
+        state.get(user).add(stateDto);
+      }
     }
   }
-  public String getLastMessage(User user) {
-    return lastMessageMap.get(user);
+
+  public StateDto getPreviousLevel(User user, boolean needRemove) {
+    List<StateDto> listState = state.get(user);
+    if (needRemove) {
+      listState.remove(listState.size() - 1);
+      return listState.get(listState.size() - 1);
+    }
+    return listState.get(listState.size() - 2);
   }
-  public void clearLastMessage(User user) {
-    lastMessageMap.remove(user);
+
+  public StateDto getPreviousLevel(User user) {
+    return getPreviousLevel(user, false);
+  }
+
+  public StateDto getCurrentLevel(User user) {
+    List<StateDto> listState = state.get(user);
+    return listState.get(listState.size() - 1);
+  }
+
+  private StateDto makeState(AbstractCommand command, Update update) {
+    StateDto state = new StateDto();
+    state.setUpdate(update);
+    state.setCommand(command);
+    state.setName(command.getClass().getName());
+    return state;
   }
 
 
@@ -53,43 +89,18 @@ public class StateService {
   }
 
   /**
-   * Сохранять предыдущее меню
-   */
-  private final HashMap<User, String> level;
-  public void setLastLevel(String lastLevel, User user) {
-    if (level.containsKey(user)) {
-      level.remove(user);
-      level.put(user, lastLevel);
-    } else {
-      level.put(user, lastLevel);
-    }
-  }
-  public String getLastLevel(User user) {
-    return level.get(user);
-  }
-
-  public void clearLastLevel(User user) {
-    level.remove(user);
-  }
-
-  @Autowired
-  public StateService() {
-    this.level = new HashMap<>();
-    this.lastMessageMap = new HashMap<>();
-    this.firstMessage = new HashMap<>();
-  }
-
-  /**
    * По последнему сообщению определят какой объект создавать
-   * @param lastMessage
    * @return
    */
-  public Class<?> getClassFormByState(String lastMessage) {
-    return switch (lastMessage) {
-      case CategoryStorageCommand.NAME -> StorageCategory.class;
-      case StorageCommand.NAME -> Storage.class;
-      default -> null;
-    };
+  public Class<?> getClassFormByState(AbstractCommand currentCommand) {
+    if (currentCommand instanceof CategoryStorageCommand) {
+      return StorageCategory.class;
+    }
+    if (currentCommand instanceof StorageCommand) {
+      return Storage.class;
+    } else {
+      return null;
+    }
   }
 
 }

@@ -13,6 +13,7 @@ import main.model.StorageCategoryRepo;
 import main.model.StorageRepo;
 import main.model.Users;
 import main.service.UserService;
+import main.state.StateService;
 import main.utils.BotUtils;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -28,6 +29,8 @@ public class FormProcessing {
 
   private final UserService userService;
 
+  private final StateService stateService;
+
   private final HashMap<User, Object> formMap = new HashMap<>();
 
   private final HashMap<User, String> fieldMap = new HashMap<>();
@@ -38,12 +41,14 @@ public class FormProcessing {
       storageCategory.setUsers(userService.findUserByIdTelegram(user.getId()));
       addedFormMap(user, storageCategory);
     }
-//    if (clazz.isAssignableFrom(Storage.class)) {
-//      Storage storage = new Storage();
-//      Users users = userService.findUserByIdTelegram(user.getId());
-//      storage.setStorageCategory();
-//      addedFormMap(user, storage);
-//    }
+    if (clazz.isAssignableFrom(Storage.class)) {
+      Storage storage = new Storage();
+      StorageCategory category = storageCategoryRepo
+          .findById(BotUtils.getNumberData(stateService.getPreviousLevel(user).getUpdate().getCallbackQuery().getData()))
+          .orElseThrow(() -> new UserException("Ошибка, выполните команду /start"));
+      storage.setStorageCategory(category);
+      addedFormMap(user, storage);
+    }
   }
 
   private void addedFormMap(User user, Object object) {
@@ -82,8 +87,7 @@ public class FormProcessing {
         }
       } catch (Exception e) {
         e.printStackTrace();
-        formMap.remove(BotUtils.getUser(update));
-        fieldMap.remove(BotUtils.getUser(update));
+        clearState(BotUtils.getUser(update));
         throw  new UserException("Ошибка, выполните команду /start");
       }
     }
@@ -103,7 +107,16 @@ public class FormProcessing {
   }
 
   private synchronized List<Field> sortingFields(Field[] fields) {
-    return Arrays.stream(fields).sorted(Comparator.comparing(Field::getName)).toList();
+    return Arrays.stream(fields)
+        .sorted(Comparator.comparing(Field::getName))
+        .sorted(Comparator.comparingInt(f1 -> {
+          if (f1.getAnnotation(MappingForm.class) == null) {
+            return 0;
+          } else {
+            return f1.getAnnotation(MappingForm.class).position();
+          }
+        }))
+        .toList();
   }
 
 }
