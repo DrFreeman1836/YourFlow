@@ -81,14 +81,14 @@ public class TelegramRequestImpl {
 //    return sendPhoto(chatId, photo, caption, parseMode, markup);
 //  }
 
-  public ResponseEntity<RspMessageDto> editMessage(Long chatId, Long messageId, String newCaption, ParseMode parseMode, ReplyKeyboard markup) {
+  public ResponseEntity<RspMessageDto> editMessage(Long chatId, Long messageId, String newText, ParseMode parseMode, ReplyKeyboard markup) {
     String markupString = "";
     try{
       markupString = mapper.writeValueAsString(markup);
     } catch (JsonProcessingException ex) {
       ex.printStackTrace();
     }
-    return request.editMessageCaption(chatId, messageId, newCaption, parseMode.getParseMode(), markupString);
+    return request.editMessageCaption(chatId, messageId, newText, parseMode.getParseMode(), markupString);
   }
 
   public ResponseEntity<?> deleteMessage(Long chatId, Long messageId) {

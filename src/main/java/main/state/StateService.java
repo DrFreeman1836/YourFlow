@@ -6,9 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import main.command.AbstractCommand;
 import main.command.impl.CategoryStorageCommand;
+import main.command.impl.StartCommand;
 import main.command.impl.StorageCommand;
 import main.model.Storage;
 import main.model.StorageCategory;
+import main.model.Task;
 import main.utils.BotUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,7 +60,23 @@ public class StateService {
 
   public StateDto getCurrentLevel(User user) {
     List<StateDto> listState = state.get(user);
+    if (listState.size() == 0) {
+      addingFictiveState(listState);
+    }
     return listState.get(listState.size() - 1);
+  }
+
+  private void addingFictiveState(List<StateDto> list) {
+    StateDto stateDto = new StateDto();
+    stateDto.setName("/start");
+    list.add(stateDto);
+  }
+
+  public void clearState(User user) {
+    if (state.containsKey(user)) {
+      state.remove(user);
+      state.put(user, new ArrayList<>());
+    }
   }
 
   private StateDto makeState(AbstractCommand command, Update update) {
@@ -95,6 +113,9 @@ public class StateService {
   public Class<?> getClassFormByState(AbstractCommand currentCommand) {
     if (currentCommand instanceof CategoryStorageCommand) {
       return StorageCategory.class;
+    }
+    if (currentCommand instanceof StartCommand) {
+      return Task.class;
     }
     if (currentCommand instanceof StorageCommand) {
       return Storage.class;

@@ -1,10 +1,16 @@
 package main.command.impl;
 
+import java.util.List;
 import main.api.telegram.enums.ParseMode;
+import main.api.telegram.impl.TelegramRequestImpl;
 import main.command.AbstractCommand;
 import main.exception.UserException;
+import main.menu.InlineMenu;
 import main.menu.StorageMenu;
+import main.model.Task;
+import main.model.Users;
 import main.service.SendingMessageDecorator;
+import main.service.TaskService;
 import main.service.UserService;
 import main.state.StateService;
 import main.utils.BotUtils;
@@ -18,30 +24,58 @@ public class StartCommand extends AbstractCommand {
 
   public static final String NAME = "/start";
 
+  private final TaskService taskService;
+
+  private final TelegramRequestImpl telegramRequest;
+
   @Autowired
-  private StartCommand(UserService userService, SendingMessageDecorator sendingMessage, StateService stateService) {
+  private StartCommand(UserService userService, SendingMessageDecorator sendingMessage, StateService stateService,
+      TaskService taskService, TelegramRequestImpl telegramRequest) {
     super(userService, sendingMessage, stateService, NAME);
+    this.taskService = taskService;
+    this.telegramRequest = telegramRequest;
   }
 
   @Override
   public void processing(Update update) {
+    stateService.clearState(BotUtils.getUser(update));
     super.processing(update);
+    User user = BotUtils.getUser(update);
+    Users users = adminActions(update);
+    List<Task> taskList = taskService.findTasksByUser(users);
+    taskList.forEach(t -> {
+      if (t.getIsActive())
+        sendingMessage.sendSimpleMessage(user, BotUtils.getChatId(update), t.getCaption(), ParseMode.HTML,
+            InlineMenu.toTask(t.getId()), false);
+    });
+  }
+
+  private Users adminActions(Update update) {
     User user = BotUtils.getUser(update);
     String name = user.getFirstName() == null ? user.getUserName() : user.getFirstName();
     try {
-      userService.findUserByIdTelegram(user.getId());
-      sendingMessage.sendSimpleMessage(user, update.getMessage().getChatId(), name + ", привет!", StorageMenu.getMainMenu(), true);
+      Users users = userService.findUserByIdTelegram(user.getId());
+      sendingMessage.sendSimpleMessage(user, update.getMessage().getChatId(), "Задачи:", StorageMenu.getMainMenu(), true);
+      return users;
     } catch (UserException ex) {
       Long idInfoMessage = sendingMessage.sendInfoMessage(update.getMessage().getChatId(), "Тут будет инфа!!!", ParseMode.NON ,StorageMenu.getMainMenu());
-      userService.saveUser(update, idInfoMessage);
+      Users users = userService.saveUser(update, idInfoMessage);
       saveFirstMessage(user);
       sendingMessage.sendSimpleMessage(user, update.getMessage().getChatId(), name + ", привет!", StorageMenu.getMainMenu(), true);
+      return users;
     }
   }
 
   @Override
   public void postProcessing(Update update) {
-
+    User user = BotUtils.getUser(update);
+    String data = update.getCallbackQuery() == null ? null : update.getCallbackQuery().getData();
+    if (data == null) return;
+    Long idMes = update.getCallbackQuery().getMessage().getMessageId().longValue();
+    if (data.startsWith("done")) {
+      taskService.taskIsDone(BotUtils.getNumberData(data));
+      telegramRequest.editMessage(BotUtils.getChatId(update), idMes, "<s>" + update.getCallbackQuery().getMessage().getText() + "</s>", ParseMode.HTML, InlineMenu.nonMenu());
+    }
   }
 
   @Override

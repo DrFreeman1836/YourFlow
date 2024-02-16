@@ -77,8 +77,9 @@ public class Bot extends TelegramLongPollingBot {
           CommandStorage.getMapCommand().get("/start").processing(update);
         }
       }
-      if (AddingCommand.NAME.equals(key)) {
-        CommandStorage.getMapCommand().get(key).processing(update, stateService.getClassFormByState(stateService.getCurrentLevel(user).getCommand()));
+      if (AddingCommand.NAME.equals(key) || "Добавить задачу".equals(key)) {
+        CommandStorage.getMapCommand().get(AddingCommand.NAME).processing(update, stateService.getClassFormByState(stateService.getCurrentLevel(user).getCommand()));
+        return;
       }
 
       if (CommandStorage.getMapCommand().containsKey(key)) {
@@ -110,3 +111,4 @@ public class Bot extends TelegramLongPollingBot {
 
 }
 //todo: обработка ошибки по удалению старого сообщения и решение проблемы
+//todo: обработка ошибки если список состояния пустой

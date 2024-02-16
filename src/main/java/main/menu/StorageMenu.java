@@ -11,8 +11,9 @@ public class StorageMenu {
 
   //https://apps.timwhitlock.info/emoji/tables/unicode ссылка на список имоджи
   private static KeyboardButton storage = new KeyboardButton("\uD83D\uDCBEХранилище");
+  private static KeyboardButton addTask = new KeyboardButton("\uD83D\uDCCCДобавить задачу");
   private static KeyboardButton back = new KeyboardButton("\uD83D\uDD19Назад");
-  private static KeyboardButton addStorage = new KeyboardButton("➕Добавить");
+  private static KeyboardButton add = new KeyboardButton("➕Добавить");
 
   /**
    * Главное меню
@@ -21,14 +22,14 @@ public class StorageMenu {
     ReplyKeyboardMarkup replyMarkup = new ReplyKeyboardMarkup();
     List<KeyboardRow> keyboard = new ArrayList<>();
     KeyboardRow keyboardRow1 = new KeyboardRow();
-    keyboardRow1.add(storage);
-//    KeyboardRow keyboardRow2 = new KeyboardRow();
-//    keyboardRow2.add(info);
+    keyboardRow1.add(addTask);
+    KeyboardRow keyboardRow2 = new KeyboardRow();
+    keyboardRow2.add(storage);
 //    keyboardRow2.add(replenishBalance);
 //    KeyboardRow keyboardRow3 = new KeyboardRow();
 //    keyboardRow3.add(enterKey);
     keyboard.add(keyboardRow1);
-    //keyboard.add(keyboardRow2);
+    keyboard.add(keyboardRow2);
     //keyboard.add(keyboardRow3);
     replyMarkup.setKeyboard(keyboard);
     replyMarkup.setSelective(true);
@@ -62,7 +63,7 @@ public class StorageMenu {
     ReplyKeyboardMarkup replyMarkup = new ReplyKeyboardMarkup();
     List<KeyboardRow> keyboard = new ArrayList<>();
     KeyboardRow keyboardFirstRow = new KeyboardRow();
-    keyboardFirstRow.add(addStorage);
+    keyboardFirstRow.add(add);
     keyboardFirstRow.add(back);
     keyboard.add(keyboardFirstRow);
     replyMarkup.setKeyboard(keyboard);

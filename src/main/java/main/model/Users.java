@@ -62,6 +62,9 @@ public class Users {
   @OneToMany(mappedBy = "users", fetch = FetchType.LAZY)
   private List<StorageCategory> storageList;
 
+  @OneToMany(mappedBy = "users", fetch = FetchType.LAZY)
+  private List<Task> taskList;
+
   @Override
   public String toString() {
     return "Users{" +

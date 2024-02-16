@@ -3,6 +3,7 @@ package main.form;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,8 @@ import main.model.Storage;
 import main.model.StorageCategory;
 import main.model.StorageCategoryRepo;
 import main.model.StorageRepo;
+import main.model.Task;
+import main.model.TaskRepo;
 import main.model.Users;
 import main.service.UserService;
 import main.state.StateService;
@@ -27,6 +30,8 @@ public class FormProcessing {
 
   private final StorageRepo storageRepo;
 
+  private final TaskRepo taskRepo;
+
   private final UserService userService;
 
   private final StateService stateService;
@@ -36,6 +41,13 @@ public class FormProcessing {
   private final HashMap<User, String> fieldMap = new HashMap<>();
 
   public synchronized void registerForm(User user, Class<?> clazz) {//todo: все синхронизировать
+    if (clazz.isAssignableFrom(Task.class)) {
+      Task task = new Task();
+      task.setUsers(userService.findUserByIdTelegram(user.getId()));
+      task.setIsActive(true);
+      task.setCreatingDate(new Date());
+      addedFormMap(user, task);
+    }
     if (clazz.isAssignableFrom(StorageCategory.class)) {
       StorageCategory storageCategory = new StorageCategory();
       storageCategory.setUsers(userService.findUserByIdTelegram(user.getId()));
@@ -97,6 +109,9 @@ public class FormProcessing {
     }
     if (formMap.get(BotUtils.getUser(update)) instanceof Storage) {
       storageRepo.save((Storage) formMap.get(BotUtils.getUser(update)));
+    }
+    if (formMap.get(BotUtils.getUser(update)) instanceof Task) {
+      taskRepo.save((Task) formMap.get(BotUtils.getUser(update)));
     }
     return "Сохранено!";
   }

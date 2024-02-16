@@ -11,3 +11,6 @@ databaseChangeLog:
   - include:
       file: changeset/create_storage.sql
       relativeToChangelogFile: true
+  - include:
+      file: changeset/create_task.sql
+      relativeToChangelogFile: true

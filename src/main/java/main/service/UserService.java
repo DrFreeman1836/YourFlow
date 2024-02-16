@@ -17,7 +17,7 @@ public class UserService {
 
   private final LastMessageRepo lastMessageRepo;
 
-  public void saveUser(Update update, Long idInfoMessage) {
+  public Users saveUser(Update update, Long idInfoMessage) {
     Users newUser = new Users();
     newUser.setIdInfoMessage(idInfoMessage);
     newUser.setUserName(update.getMessage().getFrom().getUserName());
@@ -25,7 +25,7 @@ public class UserService {
     newUser.setLastName(update.getMessage().getFrom().getLastName());
     newUser.setIdTelegram(update.getMessage().getFrom().getId());
     newUser.setChatId(update.getMessage().getChatId());
-    userRepo.save(newUser);
+    return userRepo.save(newUser);
   }
 
   public Users findUserByIdTelegram(Long idTelegram) {

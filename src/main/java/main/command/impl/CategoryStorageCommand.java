@@ -54,7 +54,7 @@ public class CategoryStorageCommand extends AbstractCommand {
 
   @Override
   public void postProcessing(Update update) throws UserException {
-    User user = update.getCallbackQuery() != null ? update.getCallbackQuery().getFrom() : update.getMessage().getFrom();
+    User user = BotUtils.getUser(update);
     String data = update.getCallbackQuery() == null ? null : update.getCallbackQuery().getData();
     if (data == null) return;
     Long idMes = update.getCallbackQuery().getMessage().getMessageId().longValue();
