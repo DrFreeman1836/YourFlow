@@ -61,7 +61,7 @@ public class Bot extends TelegramLongPollingBot {
     Long idMes = update.getMessage() != null ? update.getMessage().getMessageId().longValue() : null;
     try {
       if (idMes != null) {
-        userService.saveLastMessage(user.getId(), idMes);
+        userService.saveLastMessage(user.getId(), idMes, false);
       }
     } catch (UserException ex) {
       stateService.addFirstMessage(user, idMes);
@@ -103,7 +103,7 @@ public class Bot extends TelegramLongPollingBot {
     message.setText(textMessage);
     try {
       Integer messId = execute(message).getMessageId();
-      userService.saveLastMessage(BotUtils.getUser(update).getId(), messId.longValue());
+      userService.saveLastMessage(BotUtils.getUser(update).getId(), messId.longValue(), false);
     } catch (TelegramApiException e) {
       e.printStackTrace();
     }

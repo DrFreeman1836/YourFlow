@@ -27,6 +27,9 @@ public class LastMessage {
   @Column(name = "ID_LAST_MESSAGE")
   private Long idLastMessage;
 
+  @Column(name = "IS_INFO")
+  private Boolean isInfo;
+
 
 
 }

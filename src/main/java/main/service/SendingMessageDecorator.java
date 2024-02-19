@@ -23,7 +23,7 @@ public class SendingMessageDecorator {
       clearHistoryMessage(users);
     Long idMes = Objects.requireNonNull(telegramRequest.sendMessage(chatId, text, parseMode, markup).getBody())
         .getResult().getMessageId();
-    userService.saveLastMessage(users, idMes);
+    userService.saveLastMessage(users, idMes, false);
   }
 
   public void sendSimpleMessage(User user, Long chatId, String text, ReplyKeyboard markup, Boolean needClear) {
@@ -34,17 +34,28 @@ public class SendingMessageDecorator {
     sendSimpleMessage(user, chatId, text, ParseMode.NON, null, needClear);
   }
 
-  public Long sendInfoMessage(Long chatId, String text, ParseMode parseMode, ReplyKeyboard markup) {
-    return Objects.requireNonNull(telegramRequest.sendMessage(chatId, text, parseMode, markup).getBody())
+  public void sendInfoMessage(Users users, Long chatId, String text, ParseMode parseMode, ReplyKeyboard markup) {
+    Long idMessageInfo = Objects.requireNonNull(telegramRequest.sendMessage(chatId, text, parseMode, markup).getBody())
         .getResult().getMessageId();
+    userService.saveLastMessage(users, idMessageInfo, true);
   }
 
   private void clearHistoryMessage(Users users) {
     users.getLastMessageList().forEach(m -> {
       //todo: обработать ошибку bad request (id несуществующего сообщения)
+      if (!m.getIsInfo()) {
+        telegramRequest.deleteMessage(users.getChatId(), m.getIdLastMessage());
+      }
+    });
+    userService.clearLastMessage(users, false);
+  }
+
+  public void clearAllHistoryMessage(Users users) {
+    users.getLastMessageList().forEach(m -> {
+      //todo: обработать ошибку bad request (id несуществующего сообщения)
       telegramRequest.deleteMessage(users.getChatId(), m.getIdLastMessage());
     });
-    userService.clearLastMessage(users);
+    userService.clearLastMessage(users, true);
   }
 
   private void clearHistoryMessage(Users users, Long idMes) {
@@ -57,6 +68,11 @@ public class SendingMessageDecorator {
     userService.clearLastMessage(users, idMes);
   }
 
+  /**
+   * Удалить конкретное сообщение(например при использовании InlineMenu)
+   * @param idMes
+   * @param idTelegram
+   */
   public void deleteMessageById(Long idMes, Long idTelegram) {
     Users users = userService.findUserByIdTelegram(idTelegram);
     clearHistoryMessage(users, idMes);

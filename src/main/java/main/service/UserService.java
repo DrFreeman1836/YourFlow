@@ -1,5 +1,6 @@
 package main.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import main.exception.UserException;
 import main.model.LastMessage;
@@ -17,9 +18,8 @@ public class UserService {
 
   private final LastMessageRepo lastMessageRepo;
 
-  public Users saveUser(Update update, Long idInfoMessage) {
+  public Users saveUser(Update update) {
     Users newUser = new Users();
-    newUser.setIdInfoMessage(idInfoMessage);
     newUser.setUserName(update.getMessage().getFrom().getUserName());
     newUser.setFirstName(update.getMessage().getFrom().getFirstName());
     newUser.setLastName(update.getMessage().getFrom().getLastName());
@@ -28,27 +28,38 @@ public class UserService {
     return userRepo.save(newUser);
   }
 
+  public List<Users> findAllUsers() {
+    return userRepo.findAll();
+  }
+
   public Users findUserByIdTelegram(Long idTelegram) {
     return userRepo.findByIdTelegram(idTelegram).orElseThrow(() -> new UserException("Пользователь не найден, выполните команду \"/start\""));
   }
 
-  public void clearLastMessage(Users users) {
-    lastMessageRepo.findAllLastMessageByUsers(users).forEach(lastMessageRepo::delete);
+  public void clearLastMessage(Users users, boolean isInfo) {
+    if (isInfo) {
+      lastMessageRepo.findAllLastMessageByUsers(users)
+          .forEach(lastMessageRepo::delete);
+    } else {
+      lastMessageRepo.findAllLastMessageByUsersAndIsInfo(users, isInfo)
+          .forEach(lastMessageRepo::delete);
+    }
   }
 
   public void clearLastMessage(Users users, Long idMes) {
     lastMessageRepo.delete(lastMessageRepo.findAllLastMessageByUsersAndIdLastMessage(users, idMes));
   }
 
-  public void saveLastMessage(Users users, Long idLastMessage) {
+  public void saveLastMessage(Users users, Long idLastMessage, boolean isInfo) {
     LastMessage lastMessage = new LastMessage();
     lastMessage.setIdLastMessage(idLastMessage);
     lastMessage.setUsers(users);
+    lastMessage.setIsInfo(isInfo);
     lastMessageRepo.save(lastMessage);
   }
 
-  public void saveLastMessage(Long idTelegram, Long idLastMessage) {
-    saveLastMessage(findUserByIdTelegram(idTelegram), idLastMessage);
+  public void saveLastMessage(Long idTelegram, Long idLastMessage, boolean isInfo) {
+    saveLastMessage(findUserByIdTelegram(idTelegram), idLastMessage, isInfo);
   }
 
 }

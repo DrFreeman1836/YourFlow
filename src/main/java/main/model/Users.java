@@ -50,12 +50,6 @@ public class Users {
   @Column(name = "LAST_NAME")
   private String lastName;
 
-  /**
-   * id сообщения информационной панели
-   */
-  @Column(name = "ID_INFO_MESSAGE")
-  private Long idInfoMessage;
-
   @OneToMany(mappedBy = "users", fetch = FetchType.EAGER)
   private List<LastMessage> lastMessageList;
 
@@ -74,7 +68,6 @@ public class Users {
         ", idTelegram=" + idTelegram +
         ", firstName='" + firstName + '\'' +
         ", lastName='" + lastName + '\'' +
-        ", idInfoMessage=" + idInfoMessage +
         '}';
   }
 }

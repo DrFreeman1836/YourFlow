@@ -7,6 +7,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface LastMessageRepo extends JpaRepository<LastMessage, Long> {
 
+  List<LastMessage> findAllLastMessageByUsersAndIsInfo(Users users, Boolean isInfo);
+
   List<LastMessage> findAllLastMessageByUsers(Users users);
 
   LastMessage findAllLastMessageByUsersAndIdLastMessage(Users users, Long idLastMessage);

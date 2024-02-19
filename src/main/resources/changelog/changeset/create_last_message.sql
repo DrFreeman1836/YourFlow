@@ -1,6 +1,7 @@
 CREATE TABLE `last_message` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `id_last_message` bigint DEFAULT NULL,
+  `is_info` TINYINT(1) DEFAULT NULL,
   `users_id` bigint DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK8m7jv856pcaiv7secvei5r7fyr` (`users_id`),

@@ -42,7 +42,10 @@ public class StartCommand extends AbstractCommand {
     super.processing(update);
     User user = BotUtils.getUser(update);
     Users users = adminActions(update);
+    sendingMessage.clearAllHistoryMessage(users);
+    sendingMessage.sendInfoMessage(users, update.getMessage().getChatId(), "Тут будут категории задач", ParseMode.NON ,StorageMenu.getMainMenu());
     List<Task> taskList = taskService.findTasksByUser(users);
+    sendingMessage.sendSimpleMessage(user, update.getMessage().getChatId(), "Задачи:", StorageMenu.getMainMenu(), true);
     taskList.forEach(t -> {
       if (t.getIsActive())
         sendingMessage.sendSimpleMessage(user, BotUtils.getChatId(update), t.getCaption(), ParseMode.HTML,
@@ -52,23 +55,17 @@ public class StartCommand extends AbstractCommand {
 
   private Users adminActions(Update update) {
     User user = BotUtils.getUser(update);
-    String name = user.getFirstName() == null ? user.getUserName() : user.getFirstName();
     try {
-      Users users = userService.findUserByIdTelegram(user.getId());
-      sendingMessage.sendSimpleMessage(user, update.getMessage().getChatId(), "Задачи:", StorageMenu.getMainMenu(), true);
-      return users;
+      return userService.findUserByIdTelegram(user.getId());
     } catch (UserException ex) {
-      Long idInfoMessage = sendingMessage.sendInfoMessage(update.getMessage().getChatId(), "Тут будет инфа!!!", ParseMode.NON ,StorageMenu.getMainMenu());
-      Users users = userService.saveUser(update, idInfoMessage);
+      Users users = userService.saveUser(update);
       saveFirstMessage(user);
-      sendingMessage.sendSimpleMessage(user, update.getMessage().getChatId(), name + ", привет!", StorageMenu.getMainMenu(), true);
       return users;
     }
   }
 
   @Override
   public void postProcessing(Update update) {
-    User user = BotUtils.getUser(update);
     String data = update.getCallbackQuery() == null ? null : update.getCallbackQuery().getData();
     if (data == null) return;
     Long idMes = update.getCallbackQuery().getMessage().getMessageId().longValue();
@@ -85,7 +82,7 @@ public class StartCommand extends AbstractCommand {
 
   private void saveFirstMessage(User user) {
     stateService.getFirstMessage(user).forEach(m -> {
-      userService.saveLastMessage(user.getId(), m);
+      userService.saveLastMessage(user.getId(), m, false);
     });
     stateService.clearFirstMessage(user);
   }
