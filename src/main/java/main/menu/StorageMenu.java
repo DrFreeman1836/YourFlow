@@ -14,6 +14,9 @@ public class StorageMenu {
   private static KeyboardButton addTask = new KeyboardButton("\uD83D\uDCCCДобавить задачу");
   private static KeyboardButton back = new KeyboardButton("\uD83D\uDD19Назад");
   private static KeyboardButton add = new KeyboardButton("➕Добавить");
+  private static KeyboardButton low = new KeyboardButton("НИЗКИЙ");
+  private static KeyboardButton normal = new KeyboardButton("НОРМАЛЬНЫЙ");
+  private static KeyboardButton high = new KeyboardButton("ВЫСОКИЙ");
 
   /**
    * Главное меню
@@ -47,6 +50,21 @@ public class StorageMenu {
     List<KeyboardRow> keyboard = new ArrayList<>();
     KeyboardRow keyboardFirstRow = new KeyboardRow();
     keyboardFirstRow.add(back);
+    keyboard.add(keyboardFirstRow);
+    replyMarkup.setKeyboard(keyboard);
+    replyMarkup.setSelective(true);
+    replyMarkup.setOneTimeKeyboard(true);
+    replyMarkup.setResizeKeyboard(true);
+    return replyMarkup;
+  }
+
+  public static ReplyKeyboard getPriority() {
+    ReplyKeyboardMarkup replyMarkup = new ReplyKeyboardMarkup();
+    List<KeyboardRow> keyboard = new ArrayList<>();
+    KeyboardRow keyboardFirstRow = new KeyboardRow();
+    keyboardFirstRow.add(low);
+    keyboardFirstRow.add(normal);
+    keyboardFirstRow.add(high);
     keyboard.add(keyboardFirstRow);
     replyMarkup.setKeyboard(keyboard);
     replyMarkup.setSelective(true);

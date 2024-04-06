@@ -1,0 +1,1 @@
+update task set task.priority = 'НОРМАЛЬНЫЙ' where task.priority is null

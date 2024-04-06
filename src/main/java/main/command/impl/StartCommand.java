@@ -1,5 +1,6 @@
 package main.command.impl;
 
+import java.util.Comparator;
 import java.util.List;
 import main.api.telegram.enums.ParseMode;
 import main.api.telegram.impl.TelegramRequestImpl;
@@ -46,7 +47,7 @@ public class StartCommand extends AbstractCommand {
     sendingMessage.sendInfoMessage(users, update.getMessage().getChatId(), "Тут будут категории задач", ParseMode.NON ,StorageMenu.getMainMenu());
     List<Task> taskList = taskService.findTasksByUser(users);
     sendingMessage.sendSimpleMessage(user, update.getMessage().getChatId(), "Задачи:", StorageMenu.getMainMenu(), true);
-    taskList.forEach(t -> {
+    taskList.stream().sorted(Comparator.comparing(Task::getPriority).reversed()).forEach(t -> {
       if (t.getIsActive())
         sendingMessage.sendSimpleMessage(user, BotUtils.getChatId(update), t.getCaption(), ParseMode.HTML,
             InlineMenu.toTask(t.getId()), false);

@@ -90,7 +90,14 @@ public class FormProcessing {
         Object value = f.get(creatingObject);
         if (value == null && f.getAnnotation(MappingForm.class) != null) {
           if (fieldMap.containsKey(BotUtils.getUser(update))) {
-            f.set(creatingObject, update.getMessage().getText());
+            Class<?> fieldType = f.getType();
+            if (fieldType.isEnum()) {
+              Class<? extends Enum> enumClass = fieldType.asSubclass(Enum.class);
+              Enum<?> enumValue = Enum.valueOf(enumClass, update.getMessage().getText());
+              f.set(creatingObject, enumValue);
+            } else {
+              f.set(creatingObject, update.getMessage().getText());
+            }
             fieldMap.remove(BotUtils.getUser(update));
           } else {
             addedFieldMap(BotUtils.getUser(update), f.getName());

@@ -3,6 +3,8 @@ package main.model;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -26,6 +28,10 @@ public class Task {
   @Column(name = "CAPTION")
   private String caption;
 
+  @MappingForm(position = 2, caption = "Выберите приоритет...")
+  @Enumerated(EnumType.STRING)
+  private Priority priority;
+
   @Column(name = "CREATING_DATE")
   private Date creatingDate;
 
@@ -35,5 +41,9 @@ public class Task {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "users_id")
   private Users users;
+
+  public enum Priority {
+    ВЫСОКИЙ, НОРМАЛЬНЫЙ, НИЗКИЙ
+  }
 
 }

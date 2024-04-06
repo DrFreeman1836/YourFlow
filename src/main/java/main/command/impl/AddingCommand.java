@@ -43,8 +43,13 @@ public class AddingCommand extends AbstractCommand {
   public void postProcessing(Update update) throws UserException {
     User user = update.getMessage().getFrom();
     String requestMessage = formProcessing.getRequestToUser(update);
-    sendingMessage.sendSimpleMessage(user, update.getMessage().getChatId(), requestMessage,
-        StorageMenu.backMenu(), false);
+    if (requestMessage.equalsIgnoreCase("Выберите приоритет...")) {
+      sendingMessage.sendSimpleMessage(user, update.getMessage().getChatId(), requestMessage,
+          StorageMenu.getPriority(), false);
+    } else {
+      sendingMessage.sendSimpleMessage(user, update.getMessage().getChatId(), requestMessage,
+          StorageMenu.backMenu(), false);
+    }
   }
 
 }

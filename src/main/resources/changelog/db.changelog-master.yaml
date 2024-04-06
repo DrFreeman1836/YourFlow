@@ -14,3 +14,9 @@ databaseChangeLog:
   - include:
       file: changeset/create_task.sql
       relativeToChangelogFile: true
+  - include:
+      file: changeset/add_priority.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changeset/update_priority.sql
+      relativeToChangelogFile: true

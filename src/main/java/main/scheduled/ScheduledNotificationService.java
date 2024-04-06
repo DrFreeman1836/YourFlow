@@ -1,5 +1,6 @@
 package main.scheduled;
 
+import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import main.api.telegram.enums.ParseMode;
@@ -37,7 +38,7 @@ public class ScheduledNotificationService {
       sendingMessage.sendInfoMessage(u, u.getChatId(), "Тут будут категории задач", ParseMode.NON , StorageMenu.getMainMenu());
       List<Task> taskList = taskService.findTasksByUser(u);
       sendingMessage.sendSimpleMessage(user, u.getChatId(), "Задачи:", StorageMenu.getMainMenu(), true);
-      taskList.forEach(t -> {
+      taskList.stream().sorted(Comparator.comparing(Task::getPriority).reversed()).forEach(t -> {
         if (t.getIsActive())
           sendingMessage.sendSimpleMessage(user, u.getChatId(), t.getCaption(), ParseMode.HTML,
               InlineMenu.toTask(t.getId()), false);
