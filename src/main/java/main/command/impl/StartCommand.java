@@ -49,8 +49,14 @@ public class StartCommand extends AbstractCommand {
     sendingMessage.sendSimpleMessage(user, update.getMessage().getChatId(), "Задачи:", StorageMenu.getMainMenu(), true);
     taskList.stream().sorted(Comparator.comparing(Task::getPriority).reversed()).forEach(t -> {
       if (t.getIsActive())
-        sendingMessage.sendSimpleMessage(user, BotUtils.getChatId(update), t.getCaption(), ParseMode.HTML,
-            InlineMenu.toTask(t.getId()), false);
+        switch (t.getPriority()) {
+          case НИЗКИЙ -> sendingMessage.sendSimpleMessage(user, BotUtils.getChatId(update), "🟢" + t.getCaption(), ParseMode.HTML,
+              InlineMenu.toTask(t.getId()), false);
+          case НОРМАЛЬНЫЙ -> sendingMessage.sendSimpleMessage(user, BotUtils.getChatId(update), "🟡" + t.getCaption(), ParseMode.HTML,
+              InlineMenu.toTask(t.getId()), false);
+          case ВЫСОКИЙ -> sendingMessage.sendSimpleMessage(user, BotUtils.getChatId(update), "🔴" + t.getCaption(), ParseMode.HTML,
+              InlineMenu.toTask(t.getId()), false);
+        }
     });
   }
 
